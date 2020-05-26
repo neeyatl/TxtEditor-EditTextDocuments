@@ -1,0 +1,2 @@
+rootProject.name='Txt Editor - Edit Text Documents'
+include ':app'
