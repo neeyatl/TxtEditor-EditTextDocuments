@@ -11,17 +11,21 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.ListView
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.ListFragment
 import java.io.File
+import java.util.*
 
-class FileExplorerActivity : AppCompatActivity(), FilesListFragment.Companion.DirectoryExplorer {
+class FileExplorerActivity : AppCompatActivity(),
+    FilesListFragment.Companion.DirectoryExplorer {
 
     companion object {
         private const val REQUEST_CODE = 4579
+        private const val CURRENT_FRAGMENT_KEY = "current_fragment_restore"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -32,14 +36,24 @@ class FileExplorerActivity : AppCompatActivity(), FilesListFragment.Companion.Di
                 this,
                 android.Manifest.permission.READ_EXTERNAL_STORAGE
             ) == PackageManager.PERMISSION_GRANTED
-        ) initializeFileExplorer() // If permissions are given, update the UI.
-        else {
+        ) { // If permissions are given, update the UI.
+            if (savedInstanceState == null) initializeFileExplorer()
+            /* else SavedInstanceState will be used by the fragment manager to restore the state*/
+        } else {
             if (ActivityCompat.shouldShowRequestPermissionRationale(
                     this,
                     android.Manifest.permission.READ_EXTERNAL_STORAGE
                 )
             ) requestExternalStoragePermission()
             else requestPermissionAndOpenSettings()
+        }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        // Save the state of the fragments so that it can be retrieved on activity recreation
+        supportFragmentManager.apply {
+            putFragment(outState, CURRENT_FRAGMENT_KEY, findFragmentById(R.id.directoryContainer)!!)
         }
     }
 
@@ -146,13 +160,25 @@ class FilesListFragment : ListFragment() {
 
         val dir = File(path)
 
+        val directories = mutableListOf<String>()
+        val files = mutableListOf<String>()
+
         val list = dir.list()
         list?.let {
             for (file in it)
-                if (!file.startsWith(".") && file.endsWith(".txt") || !file.contains("."))
-                    values.add(file)
+                if (!file.startsWith("."))
+                    if (!file.contains("."))
+                        directories.add(file)
+                    else files.add(file)
         }
-        values.sort()
+        // Sorting directories and files separately so that they can be displayed separately
+        directories.sortBy { it.toLowerCase(Locale.ROOT) }
+        files.sortBy { it.toLowerCase(Locale.ROOT) }
+        values.apply {
+            addAll(directories)
+            addAll(files)
+            if (this.isEmpty()) add(getString(R.string.empty_folder_indicator_item_text))
+        }
     }
 
     override fun onCreateView(
@@ -180,6 +206,12 @@ class FilesListFragment : ListFragment() {
     override fun onListItemClick(l: ListView, v: View, position: Int, id: Long) {
         super.onListItemClick(l, v, position, id)
         var filename = listAdapter?.getItem(position)
+
+        if (filename == getString(R.string.empty_folder_indicator_item_text)) {
+            Toast.makeText(context, R.string.empty_folder_indicator_item_text, Toast.LENGTH_SHORT)
+                .show()
+            return
+        }
 
         filename = if (path.endsWith(File.separator)) path + filename
         else path + File.separator + filename
