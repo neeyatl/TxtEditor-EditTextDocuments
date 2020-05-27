@@ -14,6 +14,9 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
+            android:name=".TextEditorActivity"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
             android:name=".ReadFileActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter tools:ignore="AppLinkUrlError">

@@ -2,6 +2,7 @@
     <string name="app_name">Txt Editor</string>
 
     <string name="file_reader">File Reader</string>
+    <string name="edit">Edit</string>
 
     <string name="file_cannot_be_opened">File cannot be opened</string>
     <string name="file_not_found">File not found</string>
@@ -12,4 +13,11 @@
     <string name="show_settings">Show Settings</string>
 
     <string name="empty_folder_indicator_item_text">(Folder is empty)</string>
+
+    <string name="saving_file">Saving File</string>
+    <string name="file_saved_successfully">File Saved Successfully</string>
+    <string name="error_while_saving">An error occurred while saving the file.</string>
+    <string name="save">Save</string>
+
+    <string name="do_you_want_to_save_the_file">Do you want to save the file?</string>
 </resources>

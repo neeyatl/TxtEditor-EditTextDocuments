@@ -1,8 +1,11 @@
 package com.aurumtechie.txteditor_edittextdocuments
 
 import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import android.text.method.ScrollingMovementMethod
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -22,7 +25,9 @@ class ReadFileActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
 
         fileContentTextView.movementMethod = ScrollingMovementMethod()
+    }
 
+    private fun loadFileContent() {
         if (intent?.type == "text/plain") {
             CoroutineScope(Dispatchers.Default).launch { // Perform data retrieval tasks in the background
                 intent.data?.let {
@@ -50,4 +55,22 @@ class ReadFileActivity : AppCompatActivity() {
             finish()
         }
     }
+
+    override fun onStart() {
+        super.onStart()
+        loadFileContent()
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.read_file_activity_menu, menu)
+        return super.onCreateOptionsMenu(menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean =
+        if (item.itemId == R.id.edit) {
+            startActivity(Intent(this, TextEditorActivity::class.java).also {
+                it.data = this.intent.data
+            })
+            true
+        } else super.onOptionsItemSelected(item)
 }
