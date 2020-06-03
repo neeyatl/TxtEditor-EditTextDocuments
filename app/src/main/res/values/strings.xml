@@ -20,4 +20,5 @@
     <string name="save">Save</string>
 
     <string name="do_you_want_to_save_the_file">Do you want to save the file?</string>
+    <string name="please_select_a_txt_file">Please select a txt file</string>
 </resources>
