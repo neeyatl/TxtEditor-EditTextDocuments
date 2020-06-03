@@ -1,3 +1,5 @@
+@file:Suppress("BlockingMethodInNonBlockingContext")
+
 package com.aurumtechie.txteditor_edittextdocuments
 
 import android.annotation.SuppressLint
@@ -30,7 +32,7 @@ class TextEditorActivity : AppCompatActivity() {
             intent.data?.let {
                 val fileContent = StringBuilder("")
                 contentResolver.openInputStream(it)?.bufferedReader()
-                    ?.forEachLine { line -> fileContent.append("\n$line") } // Add a line break for each new line
+                    ?.forEachLine { line -> fileContent.append("$line\n") } // Add a line break for each new line
                 // Make UI updates in the UI/Main thread
                 withContext(Dispatchers.Main) {
                     fileContentEditText.setText(fileContent)
