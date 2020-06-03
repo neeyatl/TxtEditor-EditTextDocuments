@@ -38,6 +38,12 @@ class ReadFileActivity : AppCompatActivity() {
                         ?.forEachLine { line -> fileContent.append("$line\n") } // Add a line break for each new line
                     // Make UI updates in the UI/Main thread
                     withContext(Dispatchers.Main) {
+                        if (fileContent.isBlank())
+                            Toast.makeText(
+                                this@ReadFileActivity,
+                                R.string.file_is_empty,
+                                Toast.LENGTH_SHORT
+                            ).show()
                         fileContentTextView.text = fileContent
                         progressCircular.visibility = View.GONE
                     }
