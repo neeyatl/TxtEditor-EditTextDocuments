@@ -67,7 +67,7 @@ class FileExplorerActivity : AppCompatActivity(),
     // Invoked from the fragment. Adds another fragment to the back stack representing the new directory the user clicked on.
     override fun onDirectoryClick(path: String) {
         supportFragmentManager.beginTransaction()
-            .replace(R.id.directoryContainer, FilesListFragment.getInstance(path))
+            .replace(R.id.directoryContainer, FilesListFragment(path))
             .addToBackStack(null).commit()
     }
 
@@ -127,15 +127,14 @@ class FileExplorerActivity : AppCompatActivity(),
         }.show()
 }
 
-class FilesListFragment : ListFragment() {
-
-    private var path: String = "/storage/emulated/0"
+/** ListFragment class to display all the files and folders present inside a folder
+ * @author Neeyat Lotlikar */
+class FilesListFragment(private var path: String = ROOT_FLAG) : ListFragment() {
 
     companion object {
         private const val PATH_EXTRA = "path_extra"
 
-        fun getInstance(path: String): FilesListFragment =
-            FilesListFragment().apply { this.path = path }
+        const val ROOT_FLAG = "root_path"
 
         interface DirectoryExplorer {
             fun onDirectoryClick(path: String)
@@ -145,8 +144,6 @@ class FilesListFragment : ListFragment() {
     private lateinit var directoryExplorer: DirectoryExplorer
 
     private val values = mutableListOf<String>()
-
-    private lateinit var arrayAdapter: ArrayAdapter<String>
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -186,26 +183,64 @@ class FilesListFragment : ListFragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        if (context != null) {
-            arrayAdapter = ArrayAdapter(
-                context!!,
+        listAdapter = context?.let {
+            ArrayAdapter(
+                it,
                 android.R.layout.simple_list_item_2,
                 android.R.id.text1,
                 values
             )
-            listAdapter = arrayAdapter
         }
         return super.onCreateView(inflater, container, savedInstanceState)
     }
 
+
     override fun onStart() {
         super.onStart()
-        arrayAdapter.notifyDataSetChanged()
+        updateValues()
+        (listAdapter as ArrayAdapter<*>).notifyDataSetChanged()
+    }
+
+    private fun updateValues() {
+        if (values.isNotEmpty()) values.clear()
+
+        if (path == ROOT_FLAG) {
+            // Add root folders to values list
+            val externalStorageFiles = ContextCompat.getExternalFilesDirs(context!!, null)
+            externalStorageFiles.forEach {
+                values.add(
+                    it.path.toString()
+                        .substringBefore("/Android/data/${context!!.packageName}/files")
+                )
+            }
+
+        } else {
+            val dir = File(path)
+            val directories = mutableListOf<String>()
+            val files = mutableListOf<String>()
+
+            val list = dir.list()
+            list?.let {
+                for (file in it)
+                    if (!file.startsWith("."))
+                        if (!file.contains("."))
+                            directories.add(file)
+                        else files.add(file)
+            }
+            // Sorting directories and files separately so that they can be displayed separately
+            directories.sortBy { it.toLowerCase(Locale.ROOT) }
+            files.sortBy { it.toLowerCase(Locale.ROOT) }
+            values.apply {
+                addAll(directories)
+                addAll(files)
+                if (this.isEmpty()) add(getString(R.string.empty_folder_indicator_item_text))
+            }
+        }
     }
 
     override fun onListItemClick(l: ListView, v: View, position: Int, id: Long) {
         super.onListItemClick(l, v, position, id)
-        var filename = listAdapter?.getItem(position)
+        var filename = listAdapter?.getItem(position).toString()
 
         if (filename == getString(R.string.empty_folder_indicator_item_text)) {
             Toast.makeText(context, R.string.empty_folder_indicator_item_text, Toast.LENGTH_SHORT)
@@ -213,14 +248,21 @@ class FilesListFragment : ListFragment() {
             return
         }
 
-        filename = if (path.endsWith(File.separator)) path + filename
-        else path + File.separator + filename
+        if (path != ROOT_FLAG) // filename is already complete when ROOT_FLAG is the path
+            filename = if (path.endsWith(File.separator)) path + filename
+            else path + File.separator + filename
 
-        if (File(filename).isDirectory)
-            directoryExplorer.onDirectoryClick(filename)
-        else startActivity(Intent(context, ReadFileActivity::class.java).apply {
-            setDataAndType(Uri.fromFile(File(filename)), "text/plain")
-        })
+        val selectedItem = File(filename)
+        when {
+            selectedItem.isDirectory -> directoryExplorer.onDirectoryClick(filename)
+            selectedItem.isFile &&
+                    filename.subSequence(filename.lastIndexOf('.'), filename.length) == ".txt" ->
+                startActivity(Intent(context, ReadFileActivity::class.java).apply {
+                    setDataAndType(Uri.fromFile(File(filename)), "text/plain")
+                })
+            else -> Toast.makeText(context, R.string.please_select_a_txt_file, Toast.LENGTH_SHORT)
+                .show()
+        }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
