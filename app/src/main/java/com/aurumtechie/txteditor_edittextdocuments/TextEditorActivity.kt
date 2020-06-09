@@ -3,14 +3,13 @@
 package com.aurumtechie.txteditor_edittextdocuments
 
 import android.annotation.SuppressLint
-import android.app.AlertDialog
-import android.app.Dialog
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.android.synthetic.main.activity_read_file.progressCircular
 import kotlinx.android.synthetic.main.activity_text_editor.*
 import kotlinx.coroutines.CoroutineScope
@@ -69,10 +68,9 @@ class TextEditorActivity : AppCompatActivity() {
     @Suppress("BlockingMethodInNonBlockingContext")
     @SuppressLint("SetWorldWritable")
     private fun saveFileContent() {
-        val dialog = Dialog(this).apply {
-            title = getString(R.string.saving_file)
-        }
-        dialog.show()
+        val dialog = MaterialAlertDialogBuilder(this).setTitle(R.string.saving_file).create()
+            .apply { show() }
+
         val fileContent = fileContentEditText.text.toString()
         CoroutineScope(Dispatchers.Default).launch {
             try {
@@ -103,7 +101,7 @@ class TextEditorActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        AlertDialog.Builder(this).setTitle(R.string.do_you_want_to_save_the_file)
+        MaterialAlertDialogBuilder(this).setTitle(R.string.do_you_want_to_save_the_file)
             .setPositiveButton(android.R.string.yes) { dialog, _ ->
                 dialog.dismiss()
                 saveFileContent()
