@@ -37,4 +37,10 @@
     <string name="are_you_sure">Are you sure?</string>
     <string name="delete_file">Delete File</string>
     <string name="filename_cannot_start_with_a_dot">File name cannot start with a dot (.)</string>
+
+    <string name="credits">Credits</string>
+    <string name="credit_string"><div>Logo made by <a href="https://www.flaticon.com/authors/freepik" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div></string>
+    <string name="follow_link">Follow Link</string>
+    <string name="browser_not_found">No browser found. Can\'t open the link.</string>
+
 </resources>
