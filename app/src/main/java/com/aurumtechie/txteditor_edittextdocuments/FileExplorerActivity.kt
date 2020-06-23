@@ -98,7 +98,7 @@ class FileExplorerActivity : AppCompatActivity(), FilesListFragment.Companion.Di
                         android.Manifest.permission.READ_EXTERNAL_STORAGE
                     )
                 ) // If permission was denied once before but the user wasn't informed why the permission is necessary, do so.
-                    AlertDialog.Builder(this)
+                    MaterialAlertDialogBuilder(this)
                         .setMessage(R.string.external_storage_permission_rationale)
                         .setPositiveButton(android.R.string.ok) { dialog, _ ->
                             dialog.dismiss()

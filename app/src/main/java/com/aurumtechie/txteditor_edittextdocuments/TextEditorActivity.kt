@@ -48,16 +48,17 @@ class TextEditorActivity : AppCompatActivity() {
         }
     }
 
+    override fun onStop() {
+        super.onStop()
+        saveFileContent()
+    }
+
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.editor_menu, menu)
         return super.onCreateOptionsMenu(menu)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean = when (item.itemId) {
-        R.id.save -> {
-            saveFileContent()
-            true
-        }
         R.id.cancel_button -> {
             onBackPressed()
             true
@@ -68,9 +69,6 @@ class TextEditorActivity : AppCompatActivity() {
     @Suppress("BlockingMethodInNonBlockingContext")
     @SuppressLint("SetWorldWritable")
     private fun saveFileContent() {
-        val dialog = MaterialAlertDialogBuilder(this).setTitle(R.string.saving_file).create()
-            .apply { show() }
-
         val fileContent = fileContentEditText.text.toString()
         CoroutineScope(Dispatchers.Default).launch {
             try {
@@ -79,7 +77,6 @@ class TextEditorActivity : AppCompatActivity() {
                     close()
                 }
                 withContext(Dispatchers.Main) {
-                    dialog.dismiss()
                     Toast.makeText(
                         this@TextEditorActivity,
                         getString(R.string.file_saved_successfully),
@@ -88,7 +85,6 @@ class TextEditorActivity : AppCompatActivity() {
                 }
             } catch (e: IOException) {
                 withContext(Dispatchers.Main) {
-                    dialog.dismiss()
                     Toast.makeText(
                         this@TextEditorActivity,
                         getString(R.string.error_while_saving),
