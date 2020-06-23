@@ -77,10 +77,13 @@ class FileExplorerActivity : AppCompatActivity(), FilesListFragment.Companion.Di
     }
 
     override fun onBackPressed() {
-        // pop the root directory fragment and then exit the app
+        // Exit app onBackPressed when only the root fragment is present in the backStack
         if (supportFragmentManager.backStackEntryCount == 1)
-            super.onBackPressed()
-        super.onBackPressed()
+            startActivity(Intent(Intent.ACTION_MAIN).apply {
+                addCategory(Intent.CATEGORY_HOME)
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            }).also { finish() }
+        else super.onBackPressed()
     }
 
     override fun onRequestPermissionsResult(

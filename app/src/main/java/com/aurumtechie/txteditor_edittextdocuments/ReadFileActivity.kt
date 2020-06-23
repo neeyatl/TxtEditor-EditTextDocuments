@@ -26,6 +26,10 @@ class ReadFileActivity : AppCompatActivity() {
 
         setSupportActionBar(toolbar)
 
+        intent?.data?.let {
+            toolbar.title = it.lastPathSegment
+        }
+
         fileContentTextView.movementMethod = ScrollingMovementMethod()
     }
 
