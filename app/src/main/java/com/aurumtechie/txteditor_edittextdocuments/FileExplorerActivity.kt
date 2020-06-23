@@ -1,20 +1,17 @@
 package com.aurumtechie.txteditor_edittextdocuments
 
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
+import android.text.Html
 import android.text.InputType
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.view.WindowManager
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
-import android.widget.EditText
-import android.widget.ListView
+import android.view.*
+import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -177,6 +174,35 @@ class FileExplorerActivity : AppCompatActivity(), FilesListFragment.Companion.Di
                 Snackbar.LENGTH_LONG
             ).show()
     }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.main_menu, menu)
+        return super.onCreateOptionsMenu(menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean = if (item.itemId == R.id.credits) {
+        val creditsString = getString(R.string.credit_string)
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.credits)
+            .setMessage(
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+                    Html.fromHtml(creditsString, Html.FROM_HTML_MODE_COMPACT)
+                else Html.fromHtml(creditsString)
+            ).setPositiveButton(R.string.follow_link) { dialog, _ ->
+                dialog.dismiss()
+                try {
+                    startActivity(Intent(Intent.ACTION_VIEW).apply {
+                        data = Uri.parse("https://www.flaticon.com/authors/freepik")
+                    })
+                } catch (e: ActivityNotFoundException) {
+                    Toast.makeText(this, R.string.browser_not_found, Toast.LENGTH_LONG).show()
+                }
+            }
+            .setNegativeButton(android.R.string.cancel) { dialog, _ -> dialog.dismiss() }
+            .show()
+        true
+    } else super.onOptionsItemSelected(item)
+
 }
 
 /** ListFragment class to display all the files and folders present inside a folder
